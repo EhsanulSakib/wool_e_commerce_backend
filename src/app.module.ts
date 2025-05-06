@@ -6,6 +6,7 @@ import { jwtConfig } from './config/v1/jwt.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { mongodbConfig } from './config/v1/mongodb.config';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { mongodbConfig } from './config/v1/mongodb.config';
       inject: [ConfigService],
     }),
     JwtModule.register(jwtConfig),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
