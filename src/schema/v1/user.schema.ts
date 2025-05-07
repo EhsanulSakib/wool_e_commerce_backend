@@ -36,7 +36,7 @@ export class User extends Document {
     email: string;
 
     @Prop({ required: true })
-    passHash: string;
+    password: string;
 
     @Prop()
     phone?: string;
