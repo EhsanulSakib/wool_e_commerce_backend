@@ -6,6 +6,10 @@ export class CreateUserDto {
   image?: string;
 
   @IsString()
+  @IsNotEmpty({ message: 'User name is required' })
+  userName: string;
+
+  @IsString()
   @IsNotEmpty({ message: 'First name is required' })
   firstName: string;
 

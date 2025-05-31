@@ -27,6 +27,9 @@ export class User extends Document {
     image?: string;
 
     @Prop({ required: true })
+    userName: string;
+
+    @Prop({ required: true })
     firstName: string;
 
     @Prop({ required: true })

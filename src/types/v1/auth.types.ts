@@ -8,7 +8,7 @@ export interface Payload {
 }
 
 export interface Session {
-  id: string;
+  cid: string;
   email: string;
   userName: string;
   user?: User;

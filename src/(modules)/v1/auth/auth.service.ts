@@ -1,4 +1,117 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { User } from 'src/schema/v1/user.schema';
+import { ActivationToken } from 'src/schema/v1/activation-token.schema';
+import { Token } from 'src/schema/v1/token.schema';
+import { CreateUserRegisterDto } from './dto/create-user-register.dto';
+import { Session } from 'src/types/v1/auth.types';
+import { SendMailUtil } from 'src/utils/v1/sendEmail.utils';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
-export class AuthService {}
+export class AuthService {
+    private readonly sevenDaysExpire = 7 * 24 * 60 * 60 * 1000;
+    private readonly hourExpire = 60 * 60 * 1000;
+
+    constructor(
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+        @InjectModel(User.name) private userModel: Model<User>,
+        @InjectModel(ActivationToken.name) private activationTokenModel: Model<ActivationToken>,
+        @InjectModel(Token.name) private tokenModel: Model<Token>,
+        private jwtService: JwtService,
+        private sendMailUtil: SendMailUtil,
+    ) { }
+
+    private createAccessAndRefreshToken(payload: Session) {
+        try {
+            const accessToken = this.jwtService.sign(payload, {
+                expiresIn: "7d"
+            });
+
+            const refreshToken = this.jwtService.sign(payload, {
+                expiresIn: '7d',
+            });
+
+            return { accessToken, refreshToken };
+        } catch (error) {
+            return {};
+        }
+    }
+
+    private async saveTokensToMemory(
+        key: string | number,
+        accessToken: string,
+        refreshToken: string,
+    ) {
+        await this.cacheManager.set(
+            `${key}_access_token`,
+            accessToken,
+            this.hourExpire,
+        );
+
+        await this.cacheManager.set(
+            `${key}_refresh_token`,
+            refreshToken,
+            this.sevenDaysExpire,
+        );
+    }
+
+    async register(createUserRegisterDto: CreateUserRegisterDto) {
+        try {
+            const { email, password, ...rest } = createUserRegisterDto;
+
+            const isExist = await this.userModel.findOne({ email }).exec();
+            if (isExist) {
+                throw new BadRequestException('Email already exist');
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const user = new this.userModel({ email, password: hashedPassword, ...rest });
+            const saveUser = await user.save();
+
+            const payload: Session = {
+                email: saveUser.email,
+                cid: saveUser.cid.toString(),
+                userName: saveUser.userName,
+            };
+
+            const token = await this.jwtService.signAsync(payload, {
+                secret: process.env.JWT_SECRET,
+                expiresIn: '1h',
+            });
+
+            // Cache the token
+            await this.cacheManager.set(
+                `${saveUser.cid}_email_token`,
+                token,
+                this.hourExpire,
+            );
+
+            // Send activation email
+            const activationLink = `${process.env.FRONTEND_URL}/activate?token=${token}`;
+
+            const message = `Hello ${saveUser.userName},\n\nPlease activate your account by clicking the following link: ${activationLink}\n\nThis link will expire in 24 hours.`;
+
+            try {
+                await this.sendMailUtil.sendMail(message, saveUser.email, 'Wool (Activate Your Account)');
+            } catch (error) {
+                console.error('Failed to send activation email:', error);
+                throw new BadRequestException('Failed to send activation email');
+            }
+
+            return {
+                message: 'User registered successfully. Please check your email to activate your account.',
+                user: { email: saveUser.email, userName: saveUser.userName, cid: saveUser.cid },
+            };
+        }
+        catch (e) {
+            throw new InternalServerErrorException(e.message || 'Failed to register user');
+        }
+    }
+
+    async
+}
