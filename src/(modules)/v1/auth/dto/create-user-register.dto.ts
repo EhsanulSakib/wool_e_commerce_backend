@@ -13,10 +13,6 @@ export class CreateUserRegisterDto {
   @IsString({ message: 'User Name needs to be string' })
   readonly userName: string;
 
-  @IsNotEmpty({ message: 'Display Name is required' })
-  @IsString({ message: 'Display Name needs to be string' })
-  readonly displayName: string;
-
   @IsNotEmpty({ message: 'Email is required' })
   @IsEmail()
   readonly email: string;

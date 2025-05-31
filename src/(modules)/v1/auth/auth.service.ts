@@ -1,9 +1,9 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/schema/v1/user.schema';
+import { User, UserStatus } from 'src/schema/v1/user.schema';
 import { ActivationToken } from 'src/schema/v1/activation-token.schema';
 import { Token } from 'src/schema/v1/token.schema';
 import { CreateUserRegisterDto } from './dto/create-user-register.dto';
@@ -11,6 +11,7 @@ import { Session } from 'src/types/v1/auth.types';
 import { SendMailUtil } from 'src/utils/v1/sendEmail.utils';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { CreateUserLoginDto } from './dto/create-user-logn.dto';
 
 @Injectable()
 export class AuthService {
@@ -112,6 +113,36 @@ export class AuthService {
             throw new InternalServerErrorException(e.message || 'Failed to register user');
         }
     }
+    
+    async login(createUserLoginDto: CreateUserLoginDto) {
+        try{
+            const {email, password} = createUserLoginDto;
 
-    async
+            const user = await this.userModel.findOne({email}).exec();
+            if(!user) throw new NotFoundException('User not found');
+
+            if(user.status !== UserStatus.Active) throw new BadRequestException('User is not active');
+
+            const isMatch = await bcrypt.compare(password, user.password);
+            if(!isMatch) throw new BadRequestException('Invalid password');
+
+            const payload: Session = {
+                cid: user.cid.toString(),
+                email: user.email,
+                userName: user.userName,
+                user
+            };
+
+            const {accessToken, refreshToken} = this.createAccessAndRefreshToken(payload);
+
+            return {
+                success: true,
+                accessToken,
+                refreshToken
+            }
+        }
+        catch(e){
+            throw new InternalServerErrorException(e.message || 'Failed to login User. Try again!');
+        }
+    }
 }

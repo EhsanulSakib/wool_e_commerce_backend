@@ -47,10 +47,7 @@ export class User extends Document {
     @Prop()
     address?: string;
 
-    @Prop({ required: true, default: false })
-    is_verified: boolean;
-
-    @Prop({ required: true, enum: UserStatus, default: UserStatus.Active })
+    @Prop({ required: true, enum: UserStatus, default: UserStatus.Inactive })
     status: UserStatus;
 
     @Prop({ required: true, enum: UserRole, default: UserRole.User })
