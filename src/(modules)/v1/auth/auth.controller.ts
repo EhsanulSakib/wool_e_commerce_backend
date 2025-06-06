@@ -3,6 +3,11 @@ import { AuthService } from './auth.service';
 import { VerifyRequest } from 'src/middlewares/v1/verify.middleware';
 import { CreateUserRegisterDto } from './dto/create-user-register.dto';
 import { User } from 'src/schema/v1/user.schema';
+import { CreateUserLoginDto } from './dto/create-user-login.dto';
+import { CreateUserForgotPasswordDto } from './dto/create-user-forgot-pass.dto';
+import { CreateUserResetPasswordDto } from './dto/create-user-reset-pass.dto';
+import { CreateUserRefreshDto } from './dto/create-user-refresh.dto';
+import { CreateUserVerifyDto } from './dto/create-user-verify.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,7 +24,7 @@ export class AuthController {
   @UsePipes(new ValidationPipe())
   register(
     @Body() createUserRegisterDto: CreateUserRegisterDto,
-  ): Promise<User | { accessToken: string; refreshToken: string }> {
+  ) {
     return this.authService.register(createUserRegisterDto);
   }
 
@@ -59,3 +64,4 @@ export class AuthController {
   activateAccount(@Body() createUserVerifyDto: CreateUserVerifyDto) {
     return this.authService.activateAccount(createUserVerifyDto);
   }
+}

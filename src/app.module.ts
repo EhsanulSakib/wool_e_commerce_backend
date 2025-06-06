@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { mongodbConfig } from './config/v1/mongodb.config';
 import { UserModule } from './(modules)/v1/user/user.module';
 import { AuthModule } from './(modules)/v1/auth/auth.module';
+import { AttributeModule } from './(modules)/v1/attribute/attribute.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from './(modules)/v1/auth/auth.module';
     JwtModule.register(jwtConfig),
     UserModule,
     AuthModule,
+    AttributeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

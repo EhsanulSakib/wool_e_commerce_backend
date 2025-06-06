@@ -10,14 +10,12 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User, UserStatus } from 'src/schema/v1/user.schema';
-import { ActivationToken } from 'src/schema/v1/activation-token.schema';
-import { Token } from 'src/schema/v1/token.schema';
 import { CreateUserRegisterDto } from './dto/create-user-register.dto';
 import { Session } from 'src/types/v1/auth.types';
 import { SendMailUtil } from 'src/utils/v1/sendEmail.utils';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { CreateUserLoginDto } from './dto/create-user-logn.dto';
+import { CreateUserLoginDto } from './dto/create-user-login.dto';
 import { CreateUserVerifyDto } from './dto/create-user-verify.dto';
 import { CreateUserRefreshDto } from './dto/create-user-refresh.dto';
 import { VerifyRequest } from 'src/middlewares/v1/verify.middleware';
@@ -32,9 +30,6 @@ export class AuthService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(ActivationToken.name)
-    private activationTokenModel: Model<ActivationToken>,
-    @InjectModel(Token.name) private tokenModel: Model<Token>,
     private jwtService: JwtService,
     private sendMailUtil: SendMailUtil,
   ) {}
@@ -71,6 +66,25 @@ export class AuthService {
       refreshToken,
       this.sevenDaysExpire,
     );
+  }
+
+  async session(session: Session) {
+    try {
+      const { cid } = session || {};
+      
+      const user = await this.userModel.find({ cid }).exec();
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return {
+        status: true,
+        data: user,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Unable to get session data');
+    }
   }
 
   async register(createUserRegisterDto: CreateUserRegisterDto) {
