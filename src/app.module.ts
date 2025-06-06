@@ -9,6 +9,7 @@ import { mongodbConfig } from './config/v1/mongodb.config';
 import { UserModule } from './(modules)/v1/user/user.module';
 import { AuthModule } from './(modules)/v1/auth/auth.module';
 import { AttributeModule } from './(modules)/v1/attribute/attribute.module';
+import { VariantModule } from './(modules)/v1/variant/variant.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AttributeModule } from './(modules)/v1/attribute/attribute.module';
     UserModule,
     AuthModule,
     AttributeModule,
+    VariantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
