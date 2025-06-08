@@ -1,11 +1,14 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Attribute } from 'src/schema/v1/attribute.schema';
+import { Variant } from 'src/schema/v1/variant.schema';
 
 @Injectable()
 export class AttributeService {
-    constructor(@InjectModel(Attribute.name) private attributeModel: Model<Attribute>) {}
+    constructor(@InjectModel(Attribute.name) private attributeModel: Model<Attribute>,
+    @InjectModel(Variant.name) private variantModel: Model<Variant>
+) {}
 
     async getSingleAttribute(uid: number) {
         try {
@@ -29,6 +32,15 @@ export class AttributeService {
             return { status: true, attributes, total };
         } catch (error) {
             throw new InternalServerErrorException(error.message || 'Unable to fetch attributes');
+        }
+    }
+
+    async getAllAttributes(status: string) {
+        try {
+            const attributes = await this.attributeModel.find({ status }).exec();
+            return { status: true, attributes };
+        } catch (error) {
+            throw new InternalServerErrorException(error.message || 'Unable to fetch all attributes');
         }
     }
 
@@ -59,10 +71,18 @@ export class AttributeService {
 
     async deleteAttribute(uid: number) {
         try {
+            const checkVariants = await this.variantModel.find({ attribute_uid: uid }).exec();
+
+            if (checkVariants) {
+                throw new BadRequestException('Cannot delete attribute as it is associated with one or more variants');
+            }
+
             const deletedAttribute = await this.attributeModel.findOneAndDelete({ uid }).exec();
+
             if (!deletedAttribute) {
                 throw new NotFoundException('Attribute not found');
             }
+
             return { status: true, message: 'Attribute deleted successfully', attribute: deletedAttribute };
         } catch (error) {
             throw new InternalServerErrorException(error.message || 'Unable to delete attribute');
