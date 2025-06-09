@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Query, Post, Put, UseGuards } from '@nestjs/common';
 import { VariantService } from './variant.service';
 import { CreateVariantDto } from './dto/create-variant.dto';
 import { RolesGuard } from 'src/guards/v1/role.guard';
@@ -11,7 +11,7 @@ export class VariantController {
   @Get('single-variant')
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN, RoleEnum.STAFF)
-  async getSingleVariant(@Param('uid') uid: number) {
+  async getSingleVariant(@Query('uid') uid: number) {
     return this.variantService.getSingleVariant(uid);
   }
 
@@ -19,9 +19,10 @@ export class VariantController {
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN, RoleEnum.STAFF)
   async getMultipleVariants(
-    @Param('status') status: string = 'ACTIVE',
-    @Param('page') page: number,
-    @Param('limit') limit: number,
+    @Query('status') status: string = 'ACTIVE',
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: object,
   ) {
     return this.variantService.getMultipleVariants(status, page, limit);
   }
@@ -30,7 +31,7 @@ export class VariantController {
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN, RoleEnum.STAFF)
   async getAllVariants(
-    @Param('status') status: string = 'ACTIVE',
+    @Query('status') status: string = 'ACTIVE',
   ) {
     return this.variantService.getAllVariants(status);
   }
@@ -48,7 +49,7 @@ export class VariantController {
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN)
   async updateVariant(
-    @Param('uid') uid: number,
+    @Query('uid') uid: number,
     @Body() updateVariantDto: CreateVariantDto, // Assuming the DTO is similar for update
   ) {
     return this.variantService.updateVariant(uid, updateVariantDto);
@@ -57,7 +58,7 @@ export class VariantController {
   @Delete('delete-variant')
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN)
-  async deleteVariant(@Param('uid') uid: number) {
+  async deleteVariant(@Query('uid') uid: number) {
     return this.variantService.deleteVariant(uid);
   }
 }

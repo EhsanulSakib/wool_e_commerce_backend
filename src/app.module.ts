@@ -10,6 +10,7 @@ import { UserModule } from './(modules)/v1/user/user.module';
 import { AuthModule } from './(modules)/v1/auth/auth.module';
 import { AttributeModule } from './(modules)/v1/attribute/attribute.module';
 import { VariantModule } from './(modules)/v1/variant/variant.module';
+import { ProductModule } from './(modules)/v1/product/product.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { VariantModule } from './(modules)/v1/variant/variant.module';
     AuthModule,
     AttributeModule,
     VariantModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

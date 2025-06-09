@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Query, Post, Put, UseGuards } from '@nestjs/common';
 import { AttributeService } from './attribute.service';
 import { AttributeStatus } from 'src/types/v1/attribute.type';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
@@ -14,7 +14,7 @@ export class AttributeController {
   @Get('single-attribute')
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN, RoleEnum.STAFF)
-  async getSingleAttribute(@Param('uid') uid: number) {
+  async getSingleAttribute(@Query('uid') uid: number) {
     return this.attributeService.getSingleAttribute(uid);
   }
 
@@ -22,9 +22,9 @@ export class AttributeController {
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN, RoleEnum.STAFF)
   async getMultipleAttributes(
-    @Param('status') status: string = AttributeStatus.ACTIVE,
-    @Param('page') page: number,
-    @Param('limit') limit: number,
+    @Query('status') status: string = AttributeStatus.ACTIVE,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
   ) {
     return this.attributeService.getMultipleAttributes(status, page, limit);
   }
@@ -33,7 +33,7 @@ export class AttributeController {
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN, RoleEnum.STAFF)
   async getAllAttributes(
-    @Param('status') status: string = AttributeStatus.ACTIVE,
+    @Query('status') status: string = AttributeStatus.ACTIVE,
   ) {
     return this.attributeService.getAllAttributes(status);
   }
@@ -49,7 +49,7 @@ export class AttributeController {
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN)
   async updateAttribute(
-    @Param('uid') uid: number,
+    @Query('uid') uid: number,
     @Body() updateAttributeDto: UpdateAttributeDto,
   ) {
     return this.attributeService.updateAttribute(uid, updateAttributeDto);
@@ -58,7 +58,7 @@ export class AttributeController {
   @Delete('delete-attribute')
   @UseGuards(RolesGuard)
   @Role(RoleEnum.ADMIN)
-  async deleteAttribute(@Param('uid') uid: number) {
+  async deleteAttribute(@Query('uid') uid: number) {
     return this.attributeService.deleteAttribute(uid);
   }
 }
