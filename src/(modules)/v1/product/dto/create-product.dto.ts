@@ -1,5 +1,16 @@
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ProductStatus } from 'src/types/v1/products.type';
+
+export class ProductDetailsDto {
+  @IsNotEmpty()
+  @IsNumber()
+  attribute_uid: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  variant_uid: number;
+}
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -16,8 +27,10 @@ export class CreateProductDto {
   description: string;
 
   @IsNotEmpty()
-  @IsObject()
-  product_details: object;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductDetailsDto)
+  product_details: ProductDetailsDto[];
 
   @IsNotEmpty()
   @IsNumber()

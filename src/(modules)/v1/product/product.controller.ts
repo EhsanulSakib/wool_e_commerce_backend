@@ -12,7 +12,7 @@ export class ProductController {
   
   @Get('single-product')
   async getSingleProduct(
-    @Query('uid') uid?: string,
+    @Query('uid') uid?: number,
     @Query('name') name?: string,
   ) {
     return this.productService.getSingleProduct(uid, name);

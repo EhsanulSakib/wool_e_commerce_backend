@@ -16,13 +16,51 @@ export class ProductService {
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
   ) {}
 
-  async getSingleProduct(uid?: string, name?: string) {
+  async getSingleProduct(uid?: number, name?: string) {
     try {
-      const query: any = {};
-      if (uid) query.uid = uid;
-      if (name) query.name = new RegExp(name, 'i'); // Case-insensitive search
+      const matchStage: any = {};
+      if (uid) matchStage.uid = uid;
+      if (name) matchStage.name = { $regex: new RegExp(name, 'i') }; // Case-insensitive search
 
-      const product = await this.productModel.findOne(query).exec();
+      const pipeline = [
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: 'attributes', // Collection name for attributes
+            localField: 'product_details.attribute_uid',
+            foreignField: 'uid',
+            as: 'attribute_details',
+          },
+        },
+        {
+          $lookup: {
+            from: 'variants', // Collection name for variants
+            localField: 'product_details.variant_uid',
+            foreignField: 'uid',
+            as: 'variant_details',
+          },
+        },
+        {
+          $project: {
+            uid: 1,
+            name: 1,
+            images: 1,
+            description: 1,
+            product_details: 1,
+            price: 1,
+            discount: 1,
+            quantity: 1,
+            status: 1,
+            attribute_details: 1,
+            variant_details: 1,
+            createdAt: 1,
+            updatedAt: 1,
+          },
+        },
+        { $limit: 1 },
+      ];
+
+      const [product] = await this.productModel.aggregate(pipeline).exec();
       if (!product) {
         throw new NotFoundException('Product not found');
       }
@@ -41,33 +79,56 @@ export class ProductService {
     search: any = {},
   ): Promise<{ products: any[]; total: number }> {
     try {
+      // Validate pagination parameters
+      const pageNum = Math.max(
+        1,
+        Number.isNaN(Number(page)) ? 1 : Number(page),
+      );
+      const limitNum = Math.max(
+        1,
+        Number.isNaN(Number(limit)) ? 25 : Number(limit),
+      );
+      const skip = (pageNum - 1) * limitNum;
+
+      // Build query object
       const query: any = {};
 
-      // Handle status filter
+      // Handle status filter (prioritize query param over search object)
       if (
         status &&
         Object.values(ProductStatus).includes(status as ProductStatus)
       ) {
         query.status = status;
+      } else if (
+        search.status &&
+        Object.values(ProductStatus).includes(search.status)
+      ) {
+        query.status = search.status;
       }
 
       // Handle search filters
       if (search.name) {
-        query.name = { $regex: search.name, $options: 'i' };
+        query.name = { $regex: String(search.name), $options: 'i' };
       }
       if (search.min_price || search.max_price) {
         query.price = {};
-        if (search.min_price) query.price.$gte = Number(search.min_price);
-        if (search.max_price) query.price.$lte = Number(search.max_price);
-      }
-      if (search.status) {
-        query.status = search.status;
+        if (search.min_price) {
+          const minPrice = Number(search.min_price);
+          if (!Number.isNaN(minPrice) && minPrice >= 0) {
+            query.price.$gte = minPrice;
+          }
+        }
+        if (search.max_price) {
+          const maxPrice = Number(search.max_price);
+          if (!Number.isNaN(maxPrice) && maxPrice >= 0) {
+            query.price.$lte = maxPrice;
+          }
+        }
+        // Remove price filter if no valid bounds
+        if (Object.keys(query.price).length === 0) delete query.price;
       }
 
-      // Calculate skip for pagination
-      const skip = (page - 1) * limit;
-
-      // Build aggregation pipeline
+      // Base aggregation pipeline
       const pipeline = [
         { $match: query },
         {
@@ -127,14 +188,14 @@ export class ProductService {
           },
         },
         { $skip: skip },
-        { $limit: limit },
+        { $limit: limitNum },
       ];
 
       // Execute aggregation for products
       const products = await this.productModel.aggregate(pipeline).exec();
 
       // Count total documents for pagination
-      const total = await this.productModel.countDocuments(query).exec();
+      let total = await this.productModel.countDocuments(query).exec();
 
       // Handle variant_name search in a separate aggregation if provided
       if (search.variant_name) {
@@ -150,7 +211,7 @@ export class ProductService {
           {
             $match: {
               'variant_details.name': {
-                $regex: search.variant_name,
+                $regex: String(search.variant_name),
                 $options: 'i',
               },
               ...query,
@@ -205,7 +266,7 @@ export class ProductService {
             },
           },
           { $skip: skip },
-          { $limit: limit },
+          { $limit: limitNum },
         ];
 
         const variantFilteredProducts = await this.productModel
@@ -224,14 +285,14 @@ export class ProductService {
             {
               $match: {
                 'variant_details.name': {
-                  $regex: search.variant_name,
+                  $regex: String(search.variant_name),
                   $options: 'i',
                 },
                 ...query,
               },
             },
+            { $count: 'total' },
           ])
-          .count('total')
           .exec();
 
         return {
@@ -242,7 +303,9 @@ export class ProductService {
 
       return { products, total };
     } catch (error) {
-      throw new Error(error.message || 'Unable to fetch products');
+      throw new Error(
+        `Failed to fetch products: ${error.message || 'Unknown error'}`,
+      );
     }
   }
 
