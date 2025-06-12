@@ -12,6 +12,8 @@ import { AttributeModule } from './(modules)/v1/attribute/attribute.module';
 import { VariantModule } from './(modules)/v1/variant/variant.module';
 import { ProductModule } from './(modules)/v1/product/product.module';
 import { OrderModule } from './(modules)/v1/order/order.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ReviewModule } from './(modules)/v1/review/review.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { OrderModule } from './(modules)/v1/order/order.module';
       }),
       inject: [ConfigService],
     }),
+    CacheModule.register(),
+    JwtModule.register(jwtConfig),
     JwtModule.register(jwtConfig),
     UserModule,
     AuthModule,
@@ -31,6 +35,7 @@ import { OrderModule } from './(modules)/v1/order/order.module';
     VariantModule,
     ProductModule,
     OrderModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
