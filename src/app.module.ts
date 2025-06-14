@@ -14,6 +14,7 @@ import { ProductModule } from './(modules)/v1/product/product.module';
 import { OrderModule } from './(modules)/v1/order/order.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ReviewModule } from './(modules)/v1/review/review.module';
+import { DeliveryModule } from './(modules)/v1/delivery/delivery.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ReviewModule } from './(modules)/v1/review/review.module';
     ProductModule,
     OrderModule,
     ReviewModule,
+    DeliveryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

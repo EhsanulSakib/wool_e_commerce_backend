@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { OrderStatus } from 'src/types/v1/order.type';
+import { OrderStatus, PaymentMethod, PaymentStatus } from 'src/types/v1/order.type';
 import { generateId } from 'src/utils/v1/helper.utils';
 
 @Schema()
@@ -17,7 +17,7 @@ export const ProductsSchema = SchemaFactory.createForClass(Products);
 @Schema()
 export class PaymentDetails {
   @Prop({ required: true })
-  method: string;
+  method: PaymentMethod;
 
   @Prop({ required: true })
   currency: string;
@@ -28,8 +28,8 @@ export class PaymentDetails {
   @Prop({ required: false })
   transactionId?: string;
 
-  @Prop({ required: false })
-  payment_status?: string;
+  @Prop({ required: true, enum: PaymentStatus, default: PaymentStatus.PENDING })
+  payment_status: PaymentStatus;
 }
 
 export const PaymentDetailsSchema = SchemaFactory.createForClass(PaymentDetails);

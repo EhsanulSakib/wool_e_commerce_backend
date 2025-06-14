@@ -13,3 +13,17 @@ export interface OrderSearchParams {
   delivery_date?: string;
   city?: string;
 }
+
+export enum PaymentMethod {
+  CASH = 'cash',
+  CARD = 'card',
+  BANK_TRANSFER = 'bank_transfer',
+  ONLINE = 'online'
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  REFUNDED = 'refunded'
+}
