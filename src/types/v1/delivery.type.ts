@@ -1,9 +1,9 @@
-export enum DeliveryStatus {
-  PENDING = "pending",
-  SHIPPED = "shipped",
-  DELIVERED = "delivered",
-  CANCELLED = "cancelled"
-}
+// export enum DeliveryStatus {
+//   PENDING = "pending",
+//   SHIPPED = "shipped",
+//   DELIVERED = "delivered",
+//   CANCELLED = "cancelled"
+// }
 
 export interface DeliverySearchParams {
   order_uid?: string;

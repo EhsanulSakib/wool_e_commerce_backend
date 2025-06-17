@@ -10,7 +10,7 @@ import { Delivery } from 'src/schema/v1/delivery.schema';
 import { CreateDeliveryDto } from './dto/create-delivery.dto';
 import { Order } from 'src/schema/v1/order.schema';
 import { OrderStatus } from 'src/types/v1/order.type';
-import { DeliverySearchParams, DeliveryStatus } from 'src/types/v1/delivery.type';
+import { DeliverySearchParams } from 'src/types/v1/delivery.type';
 import { UpdateDeliveryDto } from './dto/update-delivery.dto';
 
 @Injectable()
@@ -38,7 +38,12 @@ export class DeliveryService {
     }
   }
 
-    async getMultipleDeliveries(status?: string, page: number = 1, limit: number = 25, search: DeliverySearchParams = {}) {
+  async getMultipleDeliveries(
+    status?: string,
+    page: number = 1,
+    limit: number = 25,
+    search: DeliverySearchParams = {},
+  ) {
     try {
       // Validate pagination and status
       const pageNum = Number(page);
@@ -49,9 +54,9 @@ export class DeliveryService {
       if (!Number.isInteger(limitNum) || limitNum < 1) {
         throw new BadRequestException('Limit must be a positive integer');
       }
-      if (status && !Object.values(DeliveryStatus).includes(status as DeliveryStatus)) {
-        throw new BadRequestException(`Status must be one of: ${Object.values(DeliveryStatus).join(', ')}`);
-      }
+      // if (status && !Object.values(DeliveryStatus).includes(status as DeliveryStatus)) {
+      //   throw new BadRequestException(`Status must be one of: ${Object.values(DeliveryStatus).join(', ')}`);
+      // }
 
       const query: any = {};
       if (status) {
@@ -67,7 +72,10 @@ export class DeliveryService {
         query.order_uid = orderUidNum;
       }
       if (search.tracking_number) {
-        query.tracking_number = { $regex: search.tracking_number, $options: 'i' };
+        query.tracking_number = {
+          $regex: search.tracking_number,
+          $options: 'i',
+        };
       }
       if (search.delivery_city) {
         query.delivery_city = { $regex: search.delivery_city, $options: 'i' };
@@ -76,7 +84,10 @@ export class DeliveryService {
         query.delivery_state = { $regex: search.delivery_state, $options: 'i' };
       }
       if (search.delivery_country) {
-        query.delivery_country = { $regex: search.delivery_country, $options: 'i' };
+        query.delivery_country = {
+          $regex: search.delivery_country,
+          $options: 'i',
+        };
       }
       if (search.delivery_postal_code) {
         const postalCodeNum = Number(search.delivery_postal_code);
@@ -105,7 +116,9 @@ export class DeliveryService {
 
       // Return empty result if no deliveries found
       if (!deliveries || deliveries.length === 0) {
-        throw new NotFoundException('No deliveries found for the given criteria');
+        throw new NotFoundException(
+          'No deliveries found for the given criteria',
+        );
       }
 
       return {
@@ -116,10 +129,15 @@ export class DeliveryService {
         limit: limitNum,
       };
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
-      throw new InternalServerErrorException(error.message || 'Error fetching deliveries');
+      throw new InternalServerErrorException(
+        error.message || 'Error fetching deliveries',
+      );
     }
   }
 
@@ -182,41 +200,72 @@ export class DeliveryService {
     }
   }
 
-
-
   async updateDelivery(uid: number, updateDeliveryDto: UpdateDeliveryDto) {
-    const session: ClientSession = await this.orderModel.db.startSession();
-    session.startTransaction();
-
     try {
-      const delivery = await this.deliveryModel
-        .findOne({ uid })
-        .session(session)
-        .exec();
+      const delivery = await this.deliveryModel.findOneAndUpdate(
+        { uid },
+        updateDeliveryDto,
+        { new: true },
+      );
 
       if (!delivery) {
         throw new NotFoundException('Delivery not found');
       }
 
-      const orderSearch = await this.orderModel.findOne({ uid: delivery.order_uid }).session(session).exec();
-
-      if (!orderSearch) {
-        throw new NotFoundException('Order not found');
-      }
-
-      if (orderSearch.status === OrderStatus.CONFIRMED) {
-        throw new BadRequestException(
-          `Order must be in CONFIRMED status to update a delivery, current status: ${orderSearch.status}`,
-        );
-      }
-      
-    }
-    catch (error) {
+      return {
+        message: 'Delivery updated successfully',
+        delivery,
+      };
+    } catch (error) {
       throw new InternalServerErrorException(
         error.message || 'Error updating delivery',
       );
     }
-    finally {
+  }
+
+  async deleteDelivery(uid: number) {
+    const session: ClientSession = await this.orderModel.db.startSession();
+    session.startTransaction();
+
+    try {
+      const order = await this.orderModel
+        .findOne({ uid })
+        .session(session)
+        .exec();
+
+      if (!order) {
+        throw new NotFoundException('Order not found');
+      }
+
+      if (order.status !== OrderStatus.CONFIRMED) {
+        throw new BadRequestException(
+          `Order must be in CONFIRMED status to delete a delivery, current status: ${order.status}`,
+        );
+      }
+
+      order.status = OrderStatus.CANCELLED;
+      await order.save({ session });
+
+      const deletedDelivery = await this.deliveryModel
+        .findOneAndDelete({ uid })
+        .session(session)
+        .exec();
+
+      if (!deletedDelivery) {
+        throw new NotFoundException('Delivery not found');
+      }
+
+      await session.commitTransaction();
+
+      return {
+        message: 'Delivery deleted successfully',
+        delivery: deletedDelivery,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error.message || 'Error deleting delivery',
+      );
+    } finally {
       session.endSession();
     }
   }

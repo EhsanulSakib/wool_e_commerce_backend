@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { DeliveryStatus } from "src/types/v1/delivery.type";
+// import { DeliveryStatus } from "src/types/v1/delivery.type";
 import { generateId } from "src/utils/v1/helper.utils";
 
 @Schema({timestamps: true})
@@ -43,8 +43,8 @@ export class Delivery extends Document {
   @Prop({ required: false })
   note: string;
 
-  @Prop({ required: true })
-  status: DeliveryStatus;
+  // @Prop({ required: true })
+  // status: DeliveryStatus;
 }
 
 export const DeliverySchema = SchemaFactory.createForClass(Delivery);

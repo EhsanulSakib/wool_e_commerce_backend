@@ -1,5 +1,4 @@
 import { IsNumber, IsString, IsNotEmpty, IsEnum, IsDateString, IsOptional } from 'class-validator';
-import { DeliveryStatus } from 'src/types/v1/delivery.type';
 
 export class CreateDeliveryDto {
   @IsNumber()
@@ -50,7 +49,7 @@ export class CreateDeliveryDto {
   @IsOptional()
   note: string;
 
-  @IsEnum(DeliveryStatus)
-  @IsNotEmpty()
-  status: DeliveryStatus;
+  // @IsEnum(DeliveryStatus)
+  // @IsNotEmpty()
+  // status: DeliveryStatus;
 }
