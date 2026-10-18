@@ -291,7 +291,7 @@ The MVP is complete after milestone 09.
 
 | ✓ | # | Module | Milestone | Repo | Depends on |
 |---|---|---|---|---|---|
-| ☐ | 01 | Backend setup | 01 | backend | none |
+| ◐ | 01 | Backend setup | 01 | backend | none |
 | ☐ | 02 | Database setup | 01 | backend | 01 |
 | ☐ | 03 | API core | 01 | backend | 01, 02 |
 | ☐ | 04 | Frontend setup | 01 | frontend | none |

@@ -1,0 +1,26 @@
+# Dependencies and build output
+/node_modules
+/dist
+/coverage
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Temp
+.temp
+.tmp
