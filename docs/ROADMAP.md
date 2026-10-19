@@ -46,7 +46,7 @@ Status: ☐ todo · ◐ in progress · ☑ done
 | Payments | Cash on Delivery first (Taka only), then SSLCommerz (bKash, Nagad and cards in Taka; cards in USD). Direct bKash later |
 | Colors | Black (primary) + white (secondary), inverted in dark mode. Status colors only for badges, pills, alerts and notification dots |
 | Repos | Two repos: `wool_e_commerce_backend` (rebuilt from scratch) and `wool_e_commerce_frontend` (cleaned up and extended) |
-| Frontend | Next.js (latest 16.x, App Router), Tailwind v4, Motion, GSAP, Lenis. All UI components are custom, no UI library |
+| Frontend | Next.js (latest 16.x, App Router), Tailwind v4, Redux Toolkit, Motion, GSAP, Lenis. Data fetched with Next.js `fetch`. All UI components are custom, no UI library |
 | Backend | Express 5 + TypeScript, modular monolith, Zod validation |
 | Database | PostgreSQL + Prisma |
 | Email | Nodemailer over SMTP |
@@ -56,7 +56,7 @@ Status: ☐ todo · ◐ in progress · ☑ done
 
 | # | Default | Why |
 |---|---|---|
-| 1 | Server state: TanStack Query. Client state: Zustand. Redux removed | Smaller bundle and less boilerplate with the App Router; catalog data comes from Server Components anyway |
+| 1 | Client state: **Redux Toolkit** (one store per request via `makeStore`, typed hooks, one slice per feature). Data fetching: **Next.js `fetch`** — Server Components fetch on the server with Next caching; client components call the API through a thin typed `fetch` wrapper, usually inside Redux thunks. No TanStack Query, no Zustand | Uses Next.js built-in caching and request deduplication; Redux keeps shared client state (cart, current user, UI) predictable and debuggable in Redux DevTools |
 | 2 | Theme with `next-themes` (already installed) + CSS variables | No `theme === "light" ? … : …` in components, no theme flash on load |
 | 3 | Types shared via OpenAPI: backend Zod schemas → OpenAPI spec → generated TS types in the frontend | Type safety across two repos without a monorepo |
 | 4 | Our own auth: access + refresh JWTs in httpOnly cookies, refresh-token rotation | You learn how auth really works |
@@ -76,7 +76,7 @@ The plan uses the assumption in the middle column. Answer before the module in t
 | # | Question | Assumption used in the plan | Needed by |
 |---|---|---|---|
 | 1 | Local database setup: Docker Desktop, native PostgreSQL install, or Neon cloud? | **Answered:** Neon (Postgres) + Upstash (Redis), both cloud; no Docker needed. Mailpit still runs locally for email (module 11) | Module 02 |
-| 2 | Redux Toolkit, or TanStack Query + Zustand? | **Decided (module 04):** Redux removed; TanStack Query (module 14) + Zustand (module 30) added when needed | Module 04 |
+| 2 | Redux Toolkit, or TanStack Query + Zustand? | **Decided:** Redux Toolkit for client state + Next.js `fetch` for data (no TanStack Query, no Zustand) | Module 04 |
 | 3 | Taka shown as `৳1,250` or `Tk 1,250`? | `৳1,250` (the symbol is stored per currency, so it's easy to change) | Module 08 |
 | 4 | Do USD customers get international shipping in the MVP? | Yes: addresses have a country, and there is an International shipping zone | Modules 13, 28 |
 | 5 | Can online payment (SSLCommerz) also be used without login? | Yes, with the same details form as COD | Module 33 |
@@ -189,13 +189,16 @@ wool_e_commerce_frontend/src/
 │  ├─ product/     # ProductCard, Gallery, VariantPicker, AddToCart, Filters
 │  ├─ cart/        # CartDrawer, CartLine, CartSummary
 │  └─ admin/       # DataTable, StatCard, charts
-├─ features/       # per-feature logic: hooks, stores, API calls (cart, auth, catalog, checkout)
+├─ features/       # per-feature logic: hooks, API calls (cart, auth, catalog, checkout)
+├─ store/          # Redux: makeStore, typed hooks, slices (ui, auth, cart, wishlist…)
 ├─ lib/            # API client, formatPrice (any currency), cn(), SEO + JSON-LD helpers
 ├─ styles/         # design tokens
 └─ types/          # generated API types
 ```
 
 Server Components by default. `"use client"` only for interactive pieces, kept small. Pages that need SEO (home, listing, product) fetch their data on the server.
+
+**Data and state:** Server Components call the API with Next.js `fetch` (cached with tags, refreshed on demand). Client components call it through `lib/api` (a thin typed `fetch` wrapper), usually from Redux thunks. Redux Toolkit holds state that several client components share: UI (drawers, menus), the current user, cart and wishlist. State used by a single component stays in `useState`.
 
 ### Design system
 
@@ -241,7 +244,7 @@ Server Components by default. `"use client"` only for interactive pieces, kept s
 | API HTTP headers | Public GETs: `s-maxage` + `stale-while-revalidate`. User data: `private, no-store` | Expiry |
 | Redis (module 40) | Expensive catalog queries, rate-limit counters | Event bus on product/stock changes |
 | PostgreSQL | Indexes, selecting only needed columns, no N+1 queries | n/a |
-| TanStack Query | Cart and user dashboard data in the browser | Mutations |
+| Redux store | Cart, wishlist, current user and UI state in the browser | Thunks update it after each API call |
 
 Personal data (cart, orders, profile) never goes into a shared cache.
 

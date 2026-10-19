@@ -4,39 +4,40 @@ Branch: `feat/14-api-client` (frontend repo)
 
 ## 1. Config
 
-- [ ] `API_INTERNAL_URL` (server only) in `lib/env.ts` and `.env.example`
+- [ ] `API_INTERNAL_URL` (server only) in a server env file (`lib/env.server.ts`, imports `server-only`) and `.env.example`
 - [ ] Rewrites in `next.config.ts`: `/api/v1/:path*` → `${API_INTERNAL_URL}/api/v1/:path*`
-- [ ] Backend: add the frontend origin to `CORS_ORIGINS` (still needed for direct server calls in dev tools)
+- [ ] Backend: frontend origin in `CORS_ORIGINS`; `TRUST_PROXY` set so forwarded client IPs are trusted from the Next.js server
 
 ## 2. Types
 
 - [ ] Install `openapi-typescript` (dev)
-- [ ] Script `api:types` that fetches `http://localhost:<port>/openapi.json` and writes `src/types/api.d.ts`
-- [ ] Commit the generated file; add a note in the README about regenerating
+- [ ] Script `api:types` that fetches `http://localhost:4000/openapi.json` and writes `src/types/api.d.ts`
+- [ ] Commit the generated file; README note about regenerating
 
-## 3. Clients
+## 3. Fetch wrapper
 
-- [ ] Install `openapi-fetch` (or write the wrapper)
-- [ ] `lib/api/server.ts`: base URL = internal URL, optional cookie forwarding from `cookies()`, cache/tag options
-- [ ] `lib/api/client.ts`: base URL = `/api/v1`, `credentials: "include"`
-- [ ] `lib/api/errors.ts`: `ApiError`, `isApiError`, `applyFieldErrors(form, error)`
+- [ ] `lib/api/errors.ts`: `ApiError`, `isApiError`, `toApiErrorPayload()`, `applyFieldErrors(form, error)`
+- [ ] `lib/api/request.ts`: `apiRequest()` on top of `fetch` — URL + query building, JSON body, standard response parsing, typed by path/method from `api.d.ts`
+- [ ] `lib/api/server.ts` (`server-only`): base URL = internal URL, optional cookie forwarding from `cookies()`, `X-Forwarded-For`, passes `next` / `cache` options to `fetch`
+- [ ] `lib/api/client.ts`: base URL = `/api/v1`, `credentials: 'include'`
+- [ ] Unit tests: query building, success parsing, error parsing to `ApiError`, field errors
 
-## 4. Silent refresh
+## 4. Silent refresh (browser)
 
-- [ ] Middleware/interceptor on the browser client: on 401 (not from `/auth/*`), run refresh once, retry the original request
+- [ ] On 401 (not from `/auth/*`): one refresh call, then retry the original request
 - [ ] Single-flight: share one in-flight refresh promise
-- [ ] On refresh failure: clear the `me` query, redirect to `/login?next=` if on a protected route
+- [ ] On refresh failure: dispatch `sessionExpired`, redirect to `/login?next=` on protected routes
+- [ ] Test with mocked `fetch`: 3 parallel 401s → 1 refresh → 3 retries
 
-## 5. TanStack Query
+## 5. Redux thunk conventions
 
-- [ ] Install `@tanstack/react-query` + devtools
-- [ ] `providers/query-provider.tsx` with defaults (`staleTime`, `retry` skips 4xx)
-- [ ] Query key conventions documented in `lib/api/keys.ts`
+- [ ] `store/createAppAsyncThunk.ts` (typed `state`, `dispatch`, `rejectValue`)
+- [ ] Example thunk + slice test using a mocked `fetch` (pending → fulfilled / rejected with `ApiError` payload)
+- [ ] Document the pattern in the README (server fetch vs thunk)
 
 ## 6. Verify
 
-- [ ] Temporary dev page calling `/health` from a Server Component and a Client Component
-- [ ] Test for the single-flight refresh logic (mocked fetch)
+- [ ] Temporary dev page: `/health` from a Server Component (server helper) and from a Client Component (thunk)
 
 ## Done when
 

@@ -9,32 +9,35 @@
 
 ## Goal
 
-Connect the frontend to the backend in a type-safe way. The browser talks only to the Next.js origin (`/api/v1/*` is forwarded to Express), so auth cookies stay first-party. API types are generated from the backend's OpenAPI spec, so a backend change that breaks the frontend shows up as a TypeScript error.
+Connect the frontend to the backend with Next.js's built-in `fetch`, type-safely. The browser talks only to the Next.js origin (`/api/v1/*` is forwarded to Express), so auth cookies stay first-party. API types are generated from the backend's OpenAPI spec, so a backend change that breaks the frontend shows up as a TypeScript error. Client-side calls are made from Redux thunks.
 
 ## Included
 
 - **Rewrites:** `next.config.ts` forwards `/api/v1/:path*` to `API_INTERNAL_URL`
-- **Type generation:** `openapi-typescript` turns `/openapi.json` into `src/types/api.d.ts`; script `npm run api:types`
-- **Typed client:** `openapi-fetch` (tiny, built on the generated types) or a hand-written wrapper if you want to learn the generics
-- **Server client** (`lib/api/server.ts`): calls `API_INTERNAL_URL` directly, forwards the request's cookies when needed, supports Next caching options
-- **Browser client** (`lib/api/client.ts`): same-origin requests with credentials
-- **Errors:** one `ApiError` class (status, code, message, field errors) + helper to map field errors onto forms
-- **Silent refresh:** on `401` in the browser, call `/auth/refresh` once and retry; parallel `401`s share one refresh call ("single-flight"); if refresh fails, clear user state and redirect to login when on a protected page
-- **TanStack Query:** provider with defaults (sensible `staleTime`, no retry on 4xx), devtools in development
-- **State management:** install TanStack Query here (ROADMAP open question 2); Zustand comes in module 30
+- **Type generation:** `openapi-typescript` turns `/openapi.json` into `src/types/api.d.ts` (types only, no runtime code); script `npm run api:types`
+- **Typed `fetch` wrapper** (`lib/api/request.ts`), hand-written: `apiRequest(path, { method, body, query, ...nextOptions })` built on the global `fetch`; it builds the URL, sends JSON, parses the standard response shape and returns `data` (and `meta`), or throws `ApiError`. Path, body and response types come from the generated OpenAPI types
+- **Server helper** (`lib/api/server.ts`, `server-only`): calls `API_INTERNAL_URL` directly; forwards the request's cookies when needed; passes Next caching options straight to `fetch` (`next: { tags, revalidate }`, `cache: 'no-store'`); used by Server Components and Server Actions
+- **Browser helper** (`lib/api/client.ts`): same-origin `/api/v1` with `credentials: 'include'`; used inside Redux thunks
+- **Errors:** one `ApiError` class (status, code, message, field errors) + helper to map field errors onto forms; thunks use `rejectWithValue` so components get typed errors
+- **Silent refresh (browser):** on `401`, call `/auth/refresh` once and retry; parallel `401`s share one refresh call ("single-flight"); if refresh fails, dispatch a "session expired" action and redirect to login on protected pages
+- **Thunk conventions** (`store/createAppAsyncThunk.ts`): `createAsyncThunk.withTypes<{ state: RootState; dispatch: AppDispatch; rejectValue: ApiErrorPayload }>()`, so every thunk is typed the same way
+- **Real client IP:** the server helper forwards `X-Forwarded-For` so the backend's rate limiter sees users, not the Next.js server (note from module 03)
 
 ## Not included
 
 - Auth pages and route protection (module 15)
+- Data libraries like TanStack Query or SWR (decided: Next.js `fetch` + Redux)
 
 ## Notes
 
+- **Where data is fetched:** pages that need SEO fetch in Server Components (`lib/api/server.ts`) and benefit from Next's cache and request deduplication. Interactive changes (forms, cart, toggles) run in the browser through thunks (`lib/api/client.ts`), then call `router.refresh()` if server-rendered data on the page must update.
 - Commit the generated types file so CI doesn't need a running backend; regenerate whenever the API changes.
-- Server Components never call `/api/v1` through the public URL; they use the internal URL to avoid an extra hop.
+- Server code never calls `/api/v1` through the public URL; it uses the internal URL to avoid an extra hop.
 
 ## You'll learn
 
 - The proxy / backend-for-frontend pattern
-- Generating types from an API contract
+- Generating types from an API contract and writing typed generics around `fetch`
+- Next.js `fetch` caching options on the server
+- Async thunks and error handling in Redux Toolkit
 - Single-flight token refresh
-- Server-side vs client-side data fetching in the App Router

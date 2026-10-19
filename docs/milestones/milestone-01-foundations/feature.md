@@ -37,4 +37,4 @@ Module 04 doesn't depend on the backend, so it can be built in parallel with 01�
 ## Open questions that affect this milestone
 
 - **Local database setup** (ROADMAP open question 1) — needed by module 02.
-- **Redux vs TanStack Query + Zustand** (open question 2) — needed by module 04.
+- **State management** (open question 2) — decided: Redux Toolkit for client state, Next.js `fetch` for data.

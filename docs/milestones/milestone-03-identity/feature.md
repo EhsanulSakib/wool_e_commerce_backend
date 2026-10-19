@@ -24,7 +24,7 @@ People can create an account, verify their email, log in and stay logged in secu
 | 11 | [Email service](module-11-email-service/feature.md) | backend | 02, 03 | Nodemailer SMTP, HTML templates, event-driven sending, dev preview |
 | 12 | [Auth (backend)](module-12-auth-backend/feature.md) | backend | 02, 03, 11 | Register, verify, login, refresh rotation, logout, password reset, roles |
 | 13 | [Users & addresses (backend)](module-13-users-addresses-backend/feature.md) | backend | 12 | Profile, change password, address book (BD + international), admin user list |
-| 14 | [API client](module-14-api-client/feature.md) | frontend | 03, 04 | Next rewrites, OpenAPI → TS types, typed fetch client, silent refresh, TanStack Query |
+| 14 | [API client](module-14-api-client/feature.md) | frontend | 03, 04 | Next rewrites, OpenAPI → TS types, typed `fetch` wrapper for server and client, silent refresh |
 | 15 | [Auth (frontend)](module-15-auth-frontend/feature.md) | frontend | 08, 12, 14 | Auth pages, route protection in `proxy.ts`, current user, account menu |
 | 16 | [User dashboard](module-16-user-dashboard/feature.md) | frontend | 13, 15 | `/user/dashboard`, profile, sessions, addresses |
 

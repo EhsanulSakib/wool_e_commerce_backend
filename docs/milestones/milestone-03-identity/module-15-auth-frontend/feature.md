@@ -21,10 +21,10 @@ Polished, animated auth pages and reliable session handling in the App Router: p
   - `/admin/*` → requires an access token whose verified role is ADMIN or STAFF
   - Logged-in users visiting `/login` or `/register` → `/user/dashboard`
   - Written as small composable functions so module 21 can add the currency rewrite
-- **Current user:** `getCurrentUser()` server helper (React `cache()`, calls `/users/me` with forwarded cookies); `useUser()` client hook (TanStack Query `['me']`)
+- **Current user:** `getCurrentUser()` server helper (React `cache()`, calls `/users/me` with forwarded cookies); the user is passed from the server into Redux (`authSlice`, through `StoreProvider` `preloadedState`) so client components read it with `useAppSelector(selectCurrentUser)`
 - **Server-side checks** in `/user` and `/admin` layouts (the proxy is a first filter; the layout is the real check)
 - **Navbar account menu:** avatar dropdown with Dashboard, Orders, Logout; Admin link for ADMIN/STAFF; Login/Register when logged out
-- **Logout:** POST `/auth/logout`, clear queries, `router.refresh()`
+- **Logout:** `logout` thunk (POST `/auth/logout`, clears `authSlice` and user-specific slices), then `router.refresh()` so Server Components re-render without the user
 - **Open-redirect protection:** `next` accepts only relative paths
 - `noindex` on all auth pages
 

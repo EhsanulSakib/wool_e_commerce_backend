@@ -32,7 +32,7 @@ Branch: `feat/22-product-listing` (frontend repo)
 
 ## 5. Search overlay
 
-- [ ] Debounced suggest query (TanStack Query, 250 ms)
+- [ ] Debounced suggest request with `fetch` (250 ms) and `AbortController` to cancel outdated requests
 - [ ] Results list with products (image, name, price) and categories
 - [ ] Keyboard: ↑/↓ move, Enter opens, Escape closes; `aria-activedescendant`
 - [ ] Recent searches (localStorage, max 5, clear button)

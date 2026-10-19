@@ -20,7 +20,7 @@ Branch: `feat/15-auth-frontend` (frontend repo)
 ## 3. Session
 
 - [ ] `lib/auth/get-current-user.ts` (server, `cache()`)
-- [ ] `features/auth/use-user.ts` (client, `['me']`)
+- [ ] `store/slices/authSlice.ts`: current user + `login`, `logout`, `fetchCurrentUser` thunks; root layout preloads the user from `getCurrentUser()`
 - [ ] `proxy.ts` with `protectUser`, `protectAdmin`, `redirectAuthed` functions and a matcher that skips static files and `/api`
 - [ ] `safeNext()` helper for redirect targets
 - [ ] `/user/layout.tsx` and `/admin/layout.tsx` server checks (admin shows a "no access" page for customers)

@@ -16,11 +16,12 @@ Branch: `feat/04-frontend-setup` (frontend repo)
 
 ## 3. Theme
 
-- [x] ROADMAP open question 2 → Redux removed; TanStack Query (module 14) and Zustand (module 30) added when needed
+- [x] ROADMAP open question 2 → Redux Toolkit for client state + Next.js `fetch` for data (no TanStack Query, no Zustand)
 - [x] `ThemeProvider` from `next-themes` (`attribute="data-theme"`, `defaultTheme="system"`, `enableSystem`, `disableTransitionOnChange`)
 - [x] `suppressHydrationWarning` on `<html>`
 - [x] `ThemeSwitcher` uses `useTheme()`; both icons rendered, CSS shows the right one (no hydration mismatch)
-- [x] Removed `themeSlice`, `store.ts`, `StorageProvider`, `useThemeSwitch`, `@reduxjs/toolkit`, `react-redux`
+- [x] Removed the old Redux theme code (`themeSlice`, old `store.ts`, `StorageProvider`, `useThemeSwitch`); theme now handled by `next-themes`
+- [x] Redux re-added the App Router way: `src/store/store.ts` (`makeStore`, store per request), `src/store/hooks.ts` (typed hooks), `StoreProvider` (store created once with `useState`), `uiSlice` (cart drawer, mobile menu, search) used by the navbar; slice tests
 - [x] Navbar and PrimaryButton use theme tokens (`text-foreground/70`, `bg-background`…) instead of `theme === 'light' ? … : …`; logo swaps via `dark:hidden` / `dark:block`
 - [x] `globals.css` rewritten: variables per `data-theme`, Tailwind `dark:` variant follows `data-theme`, `color-scheme` set; fixed the broken dark block
 

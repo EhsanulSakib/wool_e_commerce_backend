@@ -17,7 +17,7 @@ Give customers their own area at `/user/dashboard` with profile, security and ad
 - **`/user/dashboard`:** greeting, quick stats (orders count — placeholder until module 31), default address card, shortcuts
 - **`/user/profile`:** edit name and phone; change password (with a note that other devices get logged out); active sessions list with "log out this device" and "log out everywhere"
 - **`/user/addresses`:** address cards with default badge; add/edit in a modal; Bangladesh form with division → district cascading selects (from `/locations/bd`); international form variant (country select); set default; delete with confirmation
-- Optimistic updates and cache invalidation with TanStack Query
+- Updates through Redux thunks: optimistic change in the slice, rolled back if the API call fails; `router.refresh()` updates Server Components
 - Empty states with friendly copy
 - **Placeholders:** `/user/orders` (module 31), `/user/wishlist` (module 30)
 

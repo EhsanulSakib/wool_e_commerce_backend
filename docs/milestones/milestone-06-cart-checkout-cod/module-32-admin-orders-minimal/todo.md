@@ -22,7 +22,7 @@ Branch: `feat/32-admin-orders-minimal` (frontend repo)
 
 ## 4. Polling
 
-- [ ] Pending count refetch every 60 s (TanStack Query `refetchInterval`)
+- [ ] Pending count refreshed every 60 s (`setInterval` + `fetch` in a small client component; cleared on unmount)
 
 ## Done when
 

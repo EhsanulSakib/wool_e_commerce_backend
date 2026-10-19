@@ -4,12 +4,15 @@ Branch: `feat/30-cart-wishlist-frontend` (frontend repo)
 
 ## 1. State
 
-- [ ] Install `zustand` (if open question 2 confirmed)
-- [ ] `features/cart/guest-store.ts`: items, add, update, remove, clear; `persist` middleware; storage-event sync
-- [ ] `features/cart/api.ts`: cart, quote, merge, wishlist calls
-- [ ] `useCart()`: guest → quote query; user → cart query; same return shape
-- [ ] Optimistic mutations with rollback + error toast
-- [ ] Merge on login (hook into the login success flow), then clear local items
+- [ ] `features/cart/api.ts`: cart, quote, merge, wishlist calls with the `fetch` wrapper (module 14)
+- [ ] `store/slices/cartSlice.ts`: items, priced lines, subtotal, warnings, status; reducers for local add/update/remove/clear
+- [ ] Thunks: `quoteCart` (guest), `fetchCart`, `addToCart`, `updateQuantity`, `removeFromCart` (user), `mergeGuestCart`
+- [ ] Optimistic updates: apply on `pending`, restore on `rejected` (+ error toast)
+- [ ] Listener middleware: save guest items to localStorage on change, load on startup, re-quote when items or currency change
+- [ ] `storage` event listener for cross-tab sync
+- [ ] `useCart()` hook (selectors + dispatch), same shape for guests and users
+- [ ] Run `mergeGuestCart` after login, then clear local items
+- [ ] `store/slices/wishlistSlice.ts` + toggle thunk (optimistic)
 
 ## 2. Add to cart
 
@@ -29,14 +32,15 @@ Branch: `feat/30-cart-wishlist-frontend` (frontend repo)
 
 ## 5. Wishlist
 
-- [ ] `useWishlist()` with optimistic toggle
+- [ ] `useWishlist()` hook over `wishlistSlice`
 - [ ] Heart on cards and product page; guest → login modal
 - [ ] `/user/wishlist` page with move-to-cart and remove
 
 ## 6. Tests
 
-- [ ] Guest store unit tests (add/merge quantities, clamp)
-- [ ] `useCart` test with mocked API for guest and user modes
+- [ ] `cartSlice` reducer tests (add/merge quantities, clamp, optimistic rollback)
+- [ ] Thunk tests with mocked `fetch` for guest and user modes
+- [ ] Listener middleware test (saves to and loads from localStorage)
 
 ## Done when
 

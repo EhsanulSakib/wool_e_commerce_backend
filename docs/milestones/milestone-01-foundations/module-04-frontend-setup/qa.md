@@ -34,7 +34,7 @@ Before: console errors (missing images, prefetch 404s), lazy-loaded LCP image, c
 
 ## Non-functional
 
-- [x] No Redux code left
+- [x] Old Redux theme code removed; new store follows the per-request pattern (test: two stores never share state)
 - [x] Lighthouse "after" scores equal to or better than the baseline in every category
 
 ## Result

@@ -21,7 +21,7 @@ Bring the existing Next.js app up to date and fix its foundations before buildin
 - Remove the leftover `middleware.ts` that redirects `/about` to `/`
 - Lenis: `syncTouch: false` (native scrolling on phones); full GSAP integration comes in module 07
 - Remove the hero's scroll-scrubbed GSAP wrapper, which keeps the hero invisible until you scroll (bad for LCP); module 07 replaces it
-- State management decision (ROADMAP open question 2; assumption: TanStack Query + Zustand). Remove Redux packages if confirmed; the new libraries are installed when first needed (modules 14 and 30)
+- State management (ROADMAP open question 2, decided): Redux Toolkit for client state, set up the App Router way (a store per request via `makeStore`, `StoreProvider`, typed hooks) with a first `ui` slice; data is fetched with Next.js `fetch`
 - Folder structure from the ROADMAP (`components/ui`, `components/motion`, `components/layout`, `components/product`, `features`, `lib`, `styles`)
 - `src/lib/env.ts`: validate public env vars with Zod
 - `next.config.ts`: `poweredByHeader: false`, `reactStrictMode`, image remote patterns placeholder for Cloudinary
