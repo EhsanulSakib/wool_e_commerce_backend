@@ -32,6 +32,8 @@ Folders are named `module-01-name` instead of `module-01: name` because Windows 
 5. Mark the module ☑ in section 7.
 6. When every module in a milestone is ☑, run the milestone's `qa.md`. Start the next milestone only after it passes.
 
+> **Current practice (since 2026-10-19):** work is committed straight to `main` in both repos, with no per-module branch or PR, and CI/CD is postponed until later. Ignore the "Branch:", "PR merged" and "CI is green" lines in module docs until then. A module is done when its `todo.md` and `qa.md` pass and the work is committed.
+
 Status: ☐ todo · ◐ in progress · ☑ done
 
 ---
@@ -294,11 +296,11 @@ The MVP is complete after milestone 09.
 
 | ✓ | # | Module | Milestone | Repo | Depends on |
 |---|---|---|---|---|---|
-| ◐ | 01 | Backend setup | 01 | backend | none |
-| ◐ | 02 | Database setup | 01 | backend | 01 |
-| ◐ | 03 | API core | 01 | backend | 01, 02 |
-| ◐ | 04 | Frontend setup | 01 | frontend | none |
-| ☐ | 05 | Design tokens | 02 | frontend | 04 |
+| ☑ | 01 | Backend setup | 01 | backend | none |
+| ☑ | 02 | Database setup | 01 | backend | 01 |
+| ☑ | 03 | API core | 01 | backend | 01, 02 |
+| ☑ | 04 | Frontend setup | 01 | frontend | none |
+| ◐ | 05 | Design tokens | 02 | frontend | 04 |
 | ☐ | 06 | UI primitives | 02 | frontend | 05 |
 | ☐ | 07 | Motion system | 02 | frontend | 04, 05 |
 | ☐ | 08 | UI overlays & display | 02 | frontend | 06, 07 |
