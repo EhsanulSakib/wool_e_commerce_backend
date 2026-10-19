@@ -14,7 +14,7 @@ Automate the journeys that make or lose money, running the real frontend against
 ## Included
 
 - Playwright setup in the frontend repo (`e2e/` folder) with desktop Chrome and a mobile device project
-- **Test environment:** backend + Postgres + Mailpit started in CI as service containers; database reset and seeded before the run; frontend production build
+- **Test environment:** backend + Mailpit started in CI, using the project's single Neon database and Upstash Redis (URLs from GitHub secrets); idempotent seed before the run, no reset; every test creates uniquely named data and cleans it up; frontend production build
 - **Helpers:** login fixtures (customer, staff, admin), Mailpit API helper to read emails and extract links, data factories through the API, SSLCommerz stub mode (backend env flag) that simulates gateway responses
 - **Journeys:**
   1. Guest COD checkout → admin confirms → tracking shows Confirmed

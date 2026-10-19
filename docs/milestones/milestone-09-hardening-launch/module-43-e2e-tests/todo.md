@@ -13,7 +13,7 @@ Branch: `feat/43-e2e-tests` (frontend repo; small backend change for the payment
 - [ ] Auth fixtures (customer, staff, admin) using API login + storage state
 - [ ] Mailpit helper (list messages for an address, extract the first link)
 - [ ] API data factories (products, orders, delivered order for reviews)
-- [ ] Global setup: reset + seed the test database
+- [ ] Global setup: run the idempotent seed (no reset — there is only one database); each test creates uniquely named data and removes it afterwards
 
 ## 3. Journeys
 
@@ -34,7 +34,7 @@ Branch: `feat/43-e2e-tests` (frontend repo; small backend change for the payment
 
 ## 5. CI
 
-- [ ] Workflow with Postgres + Mailpit services, backend started from its repo (checkout both repos), frontend production build
+- [ ] Workflow with a Mailpit service and the Neon/Upstash URLs from GitHub secrets, backend started from its repo (checkout both repos), frontend production build
 - [ ] Upload the Playwright report as an artifact
 - [ ] Nightly run against staging
 

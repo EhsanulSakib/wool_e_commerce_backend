@@ -21,3 +21,42 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum UserStatus {
+  /// Registered but email not verified yet (set by auth in module 12)
+  INACTIVE
+  ACTIVE
+  /// Blocked by an admin; can't log in
+  BANNED
+
+  @@map("user_status")
+}
+
+/// A person with an account (customer, staff member or admin).
+/// Auth fields (password hash, email verification) are added in module 12.
+model User {
+  id        String     @id @default(uuid(7)) @db.Uuid
+  /// Always stored lowercase (normalized by validation before saving)
+  email     String     @unique @db.VarChar(255)
+  name      String     @db.VarChar(100)
+  /// Normalized E.164 format, e.g. +8801712345678 (validated in module 13)
+  phone     String?    @db.VarChar(20)
+  role      UserRole   @default(CUSTOMER)
+  status    UserStatus @default(INACTIVE)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("users")
+}
