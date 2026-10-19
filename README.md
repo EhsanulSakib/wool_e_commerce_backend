@@ -47,20 +47,44 @@ If a variable in `.env` is missing or invalid, the app refuses to start and prin
 | `npm run typecheck`               | Type-check without emitting files                  |
 | `npm run lint`                    | ESLint                                             |
 | `npm run format` / `format:check` | Prettier write / check                             |
-| `npm test` / `test:watch`         | Vitest (never touches the real database or Redis)  |
+| `npm test` / `test:watch`         | All tests (unit + integration)                     |
+| `npm run test:unit`               | Unit tests only (`src/`, no external services)     |
+| `npm run test:integration`        | Integration tests against the real Neon + Upstash  |
+| `npm run test:cleanup`            | Remove rows left behind by a crashed test run      |
 | `npm run db:generate`             | Regenerate the Prisma Client after a schema change |
-| `npm run db:migrate`              | Create and apply a migration in development        |
+| `npm run db:migrate`              | Create and apply a migration                       |
 | `npm run db:deploy`               | Apply pending migrations (CI / production)         |
 | `npm run db:status`               | Show which migrations are applied                  |
-| `npm run db:reset`                | Drop and recreate the database (development only!) |
+| `npm run db:seed`                 | Insert/update sample data (safe to run repeatedly) |
+| `npm run db:reset`                | ⚠️ Wipes the whole database (all your data)        |
 | `npm run db:studio`               | Open Prisma Studio to browse data                  |
+
+## Testing
+
+There is one database for everything: development, tests and scripts all use the Neon database and Upstash Redis from `.env`. So tests follow these rules:
+
+- **Never wipe data.** No `TRUNCATE`, no unfiltered `deleteMany()`, no `db:reset` in tests.
+- **Create unique, clearly fake data** with `createTestData()` from `tests/helpers/factories.ts` (emails on the reserved `@test.wool.invalid` domain).
+- **Clean up only what you created:** call `data.cleanup()` in `afterEach`.
+- **Integration tests skip themselves** when no real credentials are available (`describe.skipIf(!hasRealServices)`), so CI stays green without secrets.
+
+```ts
+const data = createTestData();
+afterEach(() => data.cleanup());
+
+it('does something with a user', async () => {
+  const user = await data.user({ role: 'ADMIN' });
+  // ...
+});
+```
 
 ## Folder structure
 
 ```
 prisma/
 ├─ schema.prisma      # database models (source of truth)
-└─ migrations/        # SQL migrations, committed to git
+├─ migrations/        # SQL migrations, committed to git
+└─ seed/              # idempotent seed scripts (upserts only)
 prisma.config.ts      # Prisma CLI config (reads DIRECT_URL)
 src/
 ├─ server.ts          # starts the HTTP server, checks dependencies, graceful shutdown
@@ -76,6 +100,10 @@ src/
 │  └─ middleware/     # 404 handler, later validation/auth/rate limits
 ├─ modules/           # feature modules (health now; auth, catalog, orders… later)
 └─ generated/prisma/  # generated Prisma Client (git-ignored)
+tests/
+├─ helpers/           # test data factories, env flags
+├─ integration/       # tests against the real Neon + Upstash
+└─ scripts/           # test maintenance scripts (leftover cleanup)
 ```
 
 Imports use the `@/` alias for `src/` (for example `@/config/env.js`). The `.js` extension is required by Node's ES module resolution; TypeScript maps it to the `.ts` file.

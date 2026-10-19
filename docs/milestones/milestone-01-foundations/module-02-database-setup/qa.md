@@ -3,8 +3,9 @@
 ## Automated
 
 - [x] `/ready` unit tests (mocked checks) pass: ready, degraded, unavailable
-- [ ] `/ready` integration test passes against the real Neon database
-- [ ] Running the whole test suite leaves existing data untouched (row counts per table the same before and after)
+- [x] `/ready` integration test passes against the real Neon database
+- [x] Running the whole test suite leaves existing data untouched (`npm run test:cleanup` finds 0 leftover rows; factory test checks counts before/after)
+- [x] Without credentials (CI without secrets) integration tests are skipped and the rest pass
 
 ## Manual
 
@@ -13,7 +14,7 @@
 | 1 | `npm run dev` | Logs show "Database connected" and "Redis connected" | ☑ |
 | 2 | `npm run db:status` | "Database schema is up to date" | ☑ |
 | 3 | `npm run db:studio` | `User` table visible | ☐ |
-| 4 | `npm run db:seed` twice | Same number of rows after the second run | ☐ |
+| 4 | `npm run db:seed` twice | Same number of rows after the second run | ☑ |
 | 5 | `GET /ready` | `200` with `status: "ready"` and latencies | ☑ |
 | 6 | Set a wrong password in `DATABASE_URL`, restart, `GET /ready` | `503` with `DB_UNAVAILABLE`; the app keeps running | ☐ |
 | 7 | Set a wrong `UPSTASH_REDIS_REST_TOKEN`, restart, `GET /ready` | `200` with `status: "degraded"` | ☐ |

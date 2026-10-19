@@ -23,6 +23,8 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
+    // `npm run db:seed` (or `prisma db seed`) runs this command.
+    seed: 'tsx prisma/seed/index.ts',
   },
   datasource: {
     url: process.env.DIRECT_URL,

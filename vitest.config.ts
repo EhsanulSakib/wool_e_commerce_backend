@@ -18,6 +18,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
+    // Neon's free tier sleeps when idle; the first query can take a few seconds.
+    testTimeout: 15_000,
+    hookTimeout: 15_000,
     // Fallbacks only for environments without a .env (e.g. CI without secrets),
     // so env validation passes for unit tests that don't touch the services.
     env: {

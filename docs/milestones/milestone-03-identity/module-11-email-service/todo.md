@@ -4,6 +4,7 @@ Branch: `feat/11-email-service` (backend repo)
 
 ## 1. Transport
 
+- [ ] Install Mailpit locally (Windows binary from the Mailpit GitHub releases; SMTP on 1025, web UI on http://localhost:8025) and document it in the README (moved here from module 02)
 - [ ] Install `nodemailer` and `@types/nodemailer`
 - [ ] Add SMTP env vars to `env.ts` and `.env.example` (Mailpit defaults for development)
 - [ ] `modules/notifications/mailer.ts`: create the transport; `verify()` at startup with environment-dependent handling
