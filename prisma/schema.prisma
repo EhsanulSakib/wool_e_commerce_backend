@@ -1,0 +1,23 @@
+// Prisma schema: the single source of truth for the database structure.
+// Docs: https://pris.ly/d/prisma-schema
+//
+// Conventions (apply to every model added from module 02 onwards):
+// - Primary keys: `id String @id @default(uuid(7)) @db.Uuid` (time-ordered UUID v7)
+// - Timestamps:   `createdAt DateTime @default(now()) @map("created_at")`
+//                 `updatedAt DateTime @updatedAt @map("updated_at")`
+// - Names:        camelCase in TypeScript, snake_case in the database (@map / @@map)
+// - Money:        `Decimal @db.Decimal(12, 2)`, never Float
+
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  importFileExtension    = "js"
+  generatedFileExtension = "ts"
+}
+
+// The connection URL is not set here. The CLI reads it from prisma.config.ts
+// (DIRECT_URL) and the app passes DATABASE_URL to the pg driver adapter.
+datasource db {
+  provider = "postgresql"
+}

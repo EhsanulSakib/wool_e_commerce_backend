@@ -75,7 +75,7 @@ The plan uses the assumption in the middle column. Answer before the module in t
 
 | # | Question | Assumption used in the plan | Needed by |
 |---|---|---|---|
-| 1 | Local database setup: Docker Desktop, native PostgreSQL install, or Neon cloud? | Docker Desktop (Postgres + Mailpit, later Redis, in one compose file) | Module 02 |
+| 1 | Local database setup: Docker Desktop, native PostgreSQL install, or Neon cloud? | **Answered:** Neon (Postgres) + Upstash (Redis), both cloud; no Docker needed. Mailpit still runs locally for email (module 11) | Module 02 |
 | 2 | Redux Toolkit, or TanStack Query + Zustand? | TanStack Query + Zustand | Module 04 |
 | 3 | Taka shown as `৳1,250` or `Tk 1,250`? | `৳1,250` (the symbol is stored per currency, so it's easy to change) | Module 08 |
 | 4 | Do USD customers get international shipping in the MVP? | Yes: addresses have a country, and there is an International shipping zone | Modules 13, 28 |

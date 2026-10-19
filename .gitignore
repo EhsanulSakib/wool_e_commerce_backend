@@ -3,6 +3,9 @@
 /dist
 /coverage
 
+# Generated Prisma Client (recreated by `npm install` / `npm run db:generate`)
+/src/generated
+
 # Environment
 .env
 .env.*

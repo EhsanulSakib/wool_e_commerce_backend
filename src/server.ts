@@ -1,6 +1,8 @@
 import { createServer } from 'node:http';
 import { createApp } from '@/app.js';
 import { env } from '@/config/env.js';
+import { disconnectDatabase } from '@/core/db/prisma.js';
+import { checkDatabase, checkRedis } from '@/core/health/checks.js';
 import { logger } from '@/core/logger/index.js';
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
@@ -11,6 +13,7 @@ server.on('listening', () => {
   logger.info(
     `🚀 Server listening on http://localhost:${env.PORT} (${env.NODE_ENV})`,
   );
+  void logDependencyStatus();
 });
 
 server.on('error', (err: NodeJS.ErrnoException) => {
@@ -24,12 +27,35 @@ server.on('error', (err: NodeJS.ErrnoException) => {
 
 server.listen(env.PORT);
 
+/**
+ * Checks the database and Redis once at startup so connection problems show
+ * up in the logs immediately. The server keeps running either way: Neon may
+ * just be waking up, and GET /ready reports the live status.
+ */
+async function logDependencyStatus() {
+  const [database, redis] = await Promise.all([checkDatabase(), checkRedis()]);
+
+  if (database.status === 'up') {
+    logger.info(`🐘 Database connected (${database.latencyMs} ms)`);
+  } else {
+    logger.error('🐘 Database is not reachable — check DATABASE_URL');
+  }
+
+  if (redis.status === 'up') {
+    logger.info(`🧱 Redis connected (${redis.latencyMs} ms)`);
+  } else {
+    logger.warn(
+      '🧱 Redis is not reachable — check UPSTASH_REDIS_REST_URL / TOKEN (the app still works without it)',
+    );
+  }
+}
+
 let shuttingDown = false;
 
 /**
  * Graceful shutdown: stop accepting new connections, let in-flight requests
- * finish, then exit. A timer forces the exit if something hangs.
- * Later modules add cleanup here (database disconnect, Redis, schedulers).
+ * finish, close the database pool, then exit. A timer forces the exit if
+ * something hangs. Redis needs no cleanup (Upstash uses stateless HTTPS).
  */
 function shutdown(reason: string, exitCode = 0) {
   if (shuttingDown) return;
@@ -42,12 +68,21 @@ function shutdown(reason: string, exitCode = 0) {
   }, SHUTDOWN_TIMEOUT_MS);
   forceExit.unref();
 
-  server.close((err) => {
+  server.close(async (err) => {
     if (err) {
       logger.error({ err }, 'Error while closing the server');
       process.exit(1);
     }
     logger.info('Server closed');
+
+    try {
+      await disconnectDatabase();
+      logger.info('Database pool closed');
+    } catch (dbErr) {
+      logger.error({ err: dbErr }, 'Error while closing the database pool');
+      exitCode = 1;
+    }
+
     process.exit(exitCode);
   });
 
