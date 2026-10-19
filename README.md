@@ -24,16 +24,21 @@ If a variable in `.env` is missing or invalid, the app refuses to start and prin
 
 ## Environment variables
 
-| Variable                   | Required | Description                                                                        |
-| -------------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `NODE_ENV`                 | no       | `development` (default), `test` or `production`                                    |
-| `PORT`                     | no       | HTTP port, default `4000`                                                          |
-| `LOG_LEVEL`                | no       | Pino log level, default `info`                                                     |
-| `DATABASE_URL`             | yes      | Neon **pooled** connection string (host contains `-pooler`), `sslmode=verify-full` |
-| `DIRECT_URL`               | for CLI  | Neon **direct** connection string (no `-pooler`), used only by Prisma CLI commands |
-| `DATABASE_POOL_MAX`        | no       | Max connections in the app's pool, default `10`                                    |
-| `UPSTASH_REDIS_REST_URL`   | yes      | Upstash REST URL (`https://…upstash.io`)                                           |
-| `UPSTASH_REDIS_REST_TOKEN` | yes      | Upstash REST token                                                                 |
+| Variable                   | Required | Description                                                                              |
+| -------------------------- | -------- | ---------------------------------------------------------------------------------------- |
+| `NODE_ENV`                 | no       | `development` (default), `test` or `production`                                          |
+| `PORT`                     | no       | HTTP port, default `4000`                                                                |
+| `LOG_LEVEL`                | no       | Pino log level, default `info`                                                           |
+| `DATABASE_URL`             | yes      | Neon **pooled** connection string (host contains `-pooler`), `sslmode=verify-full`       |
+| `DIRECT_URL`               | for CLI  | Neon **direct** connection string (no `-pooler`), used only by Prisma CLI commands       |
+| `DATABASE_POOL_MAX`        | no       | Max connections in the app's pool, default `10`                                          |
+| `UPSTASH_REDIS_REST_URL`   | yes      | Upstash REST URL (`https://…upstash.io`)                                                 |
+| `UPSTASH_REDIS_REST_TOKEN` | yes      | Upstash REST token                                                                       |
+| `CORS_ORIGINS`             | no       | Comma-separated browser origins allowed to call the API, default `http://localhost:3000` |
+| `TRUST_PROXY`              | no       | Express `trust proxy` (`false` locally, `1` behind Render/Railway)                       |
+| `RATE_LIMIT_WINDOW_MS`     | no       | Global rate-limit window, default `60000`                                                |
+| `RATE_LIMIT_MAX`           | no       | Max requests per IP per window, default `300`                                            |
+| `DOCS_ENABLED`             | no       | Serve `/docs` + `/openapi.json`; default on except in production                         |
 
 **Why two database URLs?** Neon offers a pooled endpoint (PgBouncer) and a direct one. The app uses the pooled one because it handles many short connections well. Migrations need session features (advisory locks) that a transaction pooler doesn't support, so the Prisma CLI uses the direct one.
 
@@ -95,10 +100,13 @@ src/
 │  ├─ db/prisma.ts    # the single Prisma Client (pg driver adapter + pool)
 │  ├─ cache/redis.ts  # Upstash Redis client
 │  ├─ health/         # database and Redis health checks
-│  ├─ logger/         # pino
-│  ├─ errors/         # global error handler
-│  └─ middleware/     # 404 handler, later validation/auth/rate limits
-├─ modules/           # feature modules (health now; auth, catalog, orders… later)
+│  ├─ logger/         # pino + per-request logging with request ids and redaction
+│  ├─ errors/         # AppError classes, error codes, global error handler
+│  ├─ http/           # response helpers, pagination/sort helpers, helmet + CORS
+│  ├─ middleware/     # validate (Zod), rate limiting, 404
+│  ├─ events/         # in-process event bus
+│  └─ openapi/        # API docs registry, /openapi.json and /docs
+├─ modules/           # feature modules (health, _example; auth, catalog, orders… later)
 └─ generated/prisma/  # generated Prisma Client (git-ignored)
 tests/
 ├─ helpers/           # test data factories, env flags
@@ -111,12 +119,18 @@ Imports use the `@/` alias for `src/` (for example `@/config/env.js`). The `.js`
 ## API conventions
 
 - Base path: `/api/v1`
-- Success: `{ "success": true, "data": … }`
-- Error: `{ "success": false, "error": { "code": "NOT_FOUND", "message": "…" } }`
+- Success: `{ "success": true, "data": … }` (lists add `"meta": { page, limit, total, pages }`)
+- Error: `{ "success": false, "error": { "code": "NOT_FOUND", "message": "…", "details"?: … } }`
+- Every response has an `X-Request-Id` header; send your own to trace a request through the logs
+- Interactive docs at **http://localhost:4000/docs** (spec at `/openapi.json`)
+- How to build a new feature module, and the full list of error codes: [`docs/adding-a-module.md`](docs/adding-a-module.md)
 
 ## Endpoints
 
-| Method | Path      | Description                                                                                  |
-| ------ | --------- | -------------------------------------------------------------------------------------------- |
-| GET    | `/health` | Liveness: the process is running                                                             |
-| GET    | `/ready`  | Readiness: `200 ready` / `200 degraded` (Redis down) / `503` (database down), with latencies |
+| Method | Path               | Description                                                                                  |
+| ------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| GET    | `/health`          | Liveness: the process is running                                                             |
+| GET    | `/ready`           | Readiness: `200 ready` / `200 degraded` (Redis down) / `503` (database down), with latencies |
+| GET    | `/docs`            | Interactive API docs (when `DOCS_ENABLED`)                                                   |
+| GET    | `/openapi.json`    | OpenAPI 3.1 spec (when `DOCS_ENABLED`)                                                       |
+| *      | `/api/v1/_example` | Reference module: list/get/create (not mounted in production)                                |

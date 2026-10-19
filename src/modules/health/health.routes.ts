@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { checkDatabase, checkRedis } from '@/core/health/checks.js';
+import './health.openapi.js';
 
 export const healthRouter = Router();
 
