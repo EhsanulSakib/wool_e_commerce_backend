@@ -50,7 +50,7 @@ Repo: frontend, committed on `main` (see ROADMAP "Current practice")
 
 - [x] Every item above is ticked
 - [x] [qa.md](qa.md) passes
-- [ ] Committed on `main`, module marked ☑ in the ROADMAP master index
+- [x] Committed on `main`, module marked ☑ in the ROADMAP master index
 
 ## Also done
 

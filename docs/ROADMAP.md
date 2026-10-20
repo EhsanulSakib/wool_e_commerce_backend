@@ -79,7 +79,7 @@ The plan uses the assumption in the middle column. Answer before the module in t
 |---|---|---|---|
 | 1 | Local database setup: Docker Desktop, native PostgreSQL install, or Neon cloud? | **Answered:** Neon (Postgres) + Upstash (Redis), both cloud; no Docker needed. Mailpit still runs locally for email (module 11) | Module 02 |
 | 2 | Redux Toolkit, or TanStack Query + Zustand? | **Decided:** Redux Toolkit for client state + Next.js `fetch` for data (no TanStack Query, no Zustand) | Module 04 |
-| 3 | Taka shown as `৳1,250` or `Tk 1,250`? | `৳1,250` (the symbol is stored per currency, so it's easy to change) | Module 08 |
+| 3 | Taka shown as `৳1,250` or `Tk 1,250`? | **Answered:** `৳1,250` (the symbol is stored per currency, so it's easy to change) | Module 08 |
 | 4 | Do USD customers get international shipping in the MVP? | Yes: addresses have a country, and there is an International shipping zone | Modules 13, 28 |
 | 5 | Can online payment (SSLCommerz) also be used without login? | Yes, with the same details form as COD | Module 33 |
 | 6 | Do paid online orders skip admin confirmation? | Yes, they move to Confirmed automatically; only COD orders wait for an admin | Module 33 |
@@ -301,9 +301,9 @@ The MVP is complete after milestone 09.
 | ☑ | 03 | API core | 01 | backend | 01, 02 |
 | ☑ | 04 | Frontend setup | 01 | frontend | none |
 | ☑ | 05 | Design tokens | 02 | frontend | 04 |
-| ◐ | 06 | UI primitives | 02 | frontend | 05 |
-| ☐ | 07 | Motion system | 02 | frontend | 04, 05 |
-| ☐ | 08 | UI overlays & display | 02 | frontend | 06, 07 |
+| ☑ | 06 | UI primitives | 02 | frontend | 05 |
+| ◐ | 07 | Motion system | 02 | frontend | 04, 05 |
+| ◐ | 08 | UI overlays & display | 02 | frontend | 06, 07 |
 | ☐ | 09 | Layout shell | 02 | frontend | 06, 07, 08 |
 | ☐ | 10 | Home page | 02 | frontend | 09 |
 | ☐ | 11 | Email service | 03 | backend | 02, 03 |
