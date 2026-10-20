@@ -300,8 +300,8 @@ The MVP is complete after milestone 09.
 | ☑ | 02 | Database setup | 01 | backend | 01 |
 | ☑ | 03 | API core | 01 | backend | 01, 02 |
 | ☑ | 04 | Frontend setup | 01 | frontend | none |
-| ◐ | 05 | Design tokens | 02 | frontend | 04 |
-| ☐ | 06 | UI primitives | 02 | frontend | 05 |
+| ☑ | 05 | Design tokens | 02 | frontend | 04 |
+| ◐ | 06 | UI primitives | 02 | frontend | 05 |
 | ☐ | 07 | Motion system | 02 | frontend | 04, 05 |
 | ☐ | 08 | UI overlays & display | 02 | frontend | 06, 07 |
 | ☐ | 09 | Layout shell | 02 | frontend | 06, 07, 08 |

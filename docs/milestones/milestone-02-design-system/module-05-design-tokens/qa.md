@@ -48,3 +48,4 @@ Home LCP rose from ~2.5 s (module 04) to ~3.0 s. The LCP element is still the he
 | Date | Result | Notes |
 |---|---|---|
 | 2026-10-20 | Partial pass | Automated checks (format, lint, typecheck, 44 tests, build), headless browser checks and Lighthouse done. Remaining: owner confirms the font pair on `/dev/fonts`; item 5 in a real browser |
+| 2026-10-20 | Pass | Committed by the owner; Fraunces + Inter accepted. Item 5 left to a real-browser glance (CLS measured 0) |
