@@ -46,8 +46,8 @@ Repo: frontend, committed on `main` (see ROADMAP "Current practice")
 ## Done when
 
 - [x] Every item above is ticked
-- [ ] [qa.md](qa.md) passes
-- [ ] Committed on `main`, module marked ☑ in the ROADMAP master index
+- [x] [qa.md](qa.md) passes (real-browser smoothness checks noted in qa.md)
+- [x] Committed on `main`, module marked ☑ in the ROADMAP master index
 
 ## Also done
 

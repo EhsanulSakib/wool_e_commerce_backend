@@ -302,9 +302,9 @@ The MVP is complete after milestone 09.
 | ☑ | 04 | Frontend setup | 01 | frontend | none |
 | ☑ | 05 | Design tokens | 02 | frontend | 04 |
 | ☑ | 06 | UI primitives | 02 | frontend | 05 |
-| ◐ | 07 | Motion system | 02 | frontend | 04, 05 |
-| ◐ | 08 | UI overlays & display | 02 | frontend | 06, 07 |
-| ☐ | 09 | Layout shell | 02 | frontend | 06, 07, 08 |
+| ☑ | 07 | Motion system | 02 | frontend | 04, 05 |
+| ☑ | 08 | UI overlays & display | 02 | frontend | 06, 07 |
+| ◐ | 09 | Layout shell | 02 | frontend | 06, 07, 08 |
 | ☐ | 10 | Home page | 02 | frontend | 09 |
 | ☐ | 11 | Email service | 03 | backend | 02, 03 |
 | ☐ | 12 | Auth (backend) | 03 | backend | 02, 03, 11 |
